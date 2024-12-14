@@ -6,4 +6,8 @@
 
     <string name="button_start_server">Start server</string>
     <string name="button_stop_server">Stop server</string>
+
+    <string name="error_permissions">Not all required permissions are enabled</string>
+
+    <string name="notification_call_monitor_service_running">Call monitor service running</string>
 </resources>

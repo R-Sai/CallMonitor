@@ -1,4 +1,4 @@
-package com.ramzisai.callmonitor.presentation.ui.theme.model
+package com.ramzisai.callmonitor.presentation.model
 
 data class CallLogEntry(
     val beginning: String,

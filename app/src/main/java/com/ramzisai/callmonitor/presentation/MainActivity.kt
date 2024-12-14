@@ -1,9 +1,14 @@
 package com.ramzisai.callmonitor.presentation
 
+import android.Manifest
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -29,13 +34,53 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import com.ramzisai.callmonitor.R
+import com.ramzisai.callmonitor.presentation.model.CallLogEntry
+import com.ramzisai.callmonitor.presentation.service.CallMonitorService
 import com.ramzisai.callmonitor.presentation.ui.theme.CallMonitorTheme
-import com.ramzisai.callmonitor.presentation.ui.theme.model.CallLogEntry
 import com.ramzisai.callmonitor.presentation.viewmodel.MainViewModel
 
 class MainActivity : ComponentActivity() {
+
     private val viewModel: MainViewModel by viewModels()
+
+    private val requiredPermissions = arrayOf(
+        Manifest.permission.READ_PHONE_STATE,
+        Manifest.permission.READ_CALL_LOG
+    )
+
+    private val permissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val allGranted = permissions.entries.all { it.value }
+        if (allGranted) {
+            startCallMonitorService()
+        } else {
+            Toast.makeText(this, getString(R.string.error_permissions), Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private fun checkAndRequestPermissions() {
+        val permissionsToRequest = requiredPermissions.filter {
+            ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
+        }.toTypedArray()
+
+        if (permissionsToRequest.isEmpty()) {
+            startCallMonitorService()
+        } else {
+            permissionLauncher.launch(permissionsToRequest)
+        }
+    }
+
+    private fun startCallMonitorService() {
+        val intent = Intent(this, CallMonitorService::class.java)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(intent)
+        } else {
+            startService(intent)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,6 +92,11 @@ class MainActivity : ComponentActivity() {
                 )
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        checkAndRequestPermissions()
     }
 }
 

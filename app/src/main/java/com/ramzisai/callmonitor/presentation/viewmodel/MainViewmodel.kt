@@ -3,7 +3,7 @@ package com.ramzisai.callmonitor.presentation.viewmodel
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.ramzisai.callmonitor.presentation.ui.theme.model.CallLogEntry
+import com.ramzisai.callmonitor.presentation.model.CallLogEntry
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
