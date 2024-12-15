@@ -36,18 +36,21 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.ramzisai.callmonitor.R
-import com.ramzisai.callmonitor.presentation.model.CallLogEntry
+import com.ramzisai.callmonitor.domain.model.CallLogEntry
 import com.ramzisai.callmonitor.presentation.service.CallMonitorService
 import com.ramzisai.callmonitor.presentation.ui.theme.CallMonitorTheme
 import com.ramzisai.callmonitor.presentation.viewmodel.MainViewModel
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     private val viewModel: MainViewModel by viewModels()
 
     private val requiredPermissions = arrayOf(
         Manifest.permission.READ_PHONE_STATE,
-        Manifest.permission.READ_CALL_LOG
+        Manifest.permission.READ_CALL_LOG,
+        Manifest.permission.READ_CONTACTS
     )
 
     private val permissionLauncher = registerForActivityResult(
@@ -141,7 +144,7 @@ fun MainScreenPreview() {
     MainScreen(
         callLog = listOf(
             CallLogEntry(
-                beginning = "mock beginning",
+                timestamp = 12345,
                 duration = 12345L,
                 number = "123-456-789",
                 name = "John Doe",
@@ -239,7 +242,7 @@ fun CallLogItem(
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
-                text = entry.beginning,
+                text = entry.timestamp.toString(),
                 style = MaterialTheme.typography.bodyMedium
             )
 

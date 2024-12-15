@@ -15,17 +15,36 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import com.ramzisai.callmonitor.R
+import com.ramzisai.callmonitor.domain.usecase.SaveCallLogUseCase
 import com.ramzisai.callmonitor.presentation.MainActivity
+import com.ramzisai.callmonitor.presentation.util.AndroidCallLogUtil
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class CallMonitorService: Service() {
+
+    private val serviceJob = SupervisorJob()
+    private val serviceScope = CoroutineScope(Dispatchers.IO + serviceJob)
 
     private lateinit var telephonyManager: TelephonyManager
     private var telephonyCallback: TelephonyCallbackImpl? = null
+
+    @Inject
+    lateinit var saveCallLogUseCase: SaveCallLogUseCase
 
     @RequiresApi(Build.VERSION_CODES.S)
     private inner class TelephonyCallbackImpl : TelephonyCallback(), TelephonyCallback.CallStateListener {
         override fun onCallStateChanged(state: Int) {
             Log.d(TAG, "onCallStateChanged - state: $state")
+            when (state) {
+                TelephonyManager.CALL_STATE_OFFHOOK,
+                TelephonyManager.CALL_STATE_RINGING -> createNewCallLogEntry(AndroidCallLogUtil.getPhoneNumberFromLog(this@CallMonitorService))
+            }
         }
     }
 
@@ -62,6 +81,7 @@ class CallMonitorService: Service() {
     override fun onDestroy() {
         super.onDestroy()
         Log.i(TAG, "onDestroy")
+        serviceJob.cancel()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             telephonyCallback?.let {
                 telephonyManager.unregisterTelephonyCallback(it)
@@ -102,6 +122,20 @@ class CallMonitorService: Service() {
             .build()
 
         startForeground(FOREGROUND_SERVICE_ID, notification)
+    }
+
+    fun createNewCallLogEntry(contact: Pair<String?, String?>) {
+        val (number, name) = contact
+
+        serviceScope.launch {
+            saveCallLogUseCase(
+                SaveCallLogUseCase.Params(
+                    name = name,
+                    number = number,
+                    timestamp = System.currentTimeMillis()
+                )
+            )
+        }
     }
 
     companion object {
