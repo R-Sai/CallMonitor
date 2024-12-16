@@ -23,7 +23,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class CallMonitorService: ScopedService() {
+class CallMonitorService : ScopedService() {
 
     private lateinit var telephonyManager: TelephonyManager
     private var telephonyCallback: TelephonyCallbackImpl? = null

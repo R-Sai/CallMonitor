@@ -8,7 +8,7 @@ import javax.inject.Inject
 
 class GetCallLogUseCase @Inject constructor(
     private val repository: CallLogRepository
-): UseCase<Unit, List<CallLogEntry>> {
+) : UseCase<Unit, List<CallLogEntry>> {
     override suspend fun invoke(parameter: Unit): Flow<List<CallLogEntry>> {
         return repository.getCallLog().map { log ->
             log.sortedByDescending { it.timestamp }

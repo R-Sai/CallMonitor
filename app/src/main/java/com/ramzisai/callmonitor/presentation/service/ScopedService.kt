@@ -6,7 +6,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 
-abstract class ScopedService: Service() {
+abstract class ScopedService : Service() {
     private val serviceJob = SupervisorJob()
     val serviceScope = CoroutineScope(Dispatchers.IO + serviceJob)
 
