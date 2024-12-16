@@ -6,13 +6,15 @@ import javax.inject.Inject
 
 class SaveCallLogUseCase @Inject constructor(
     private val repository: CallLogRepository
-): NoResultUseCase<SaveCallLogUseCase.Params> {
+) : NoResultUseCase<SaveCallLogUseCase.Params> {
     override suspend fun invoke(parameter: Params) {
-        repository.putCallLog(CallLogEntry(
-            name = parameter.name,
-            number = parameter.number,
-            timestamp = parameter.timestamp
-        ))
+        repository.putCallLog(
+            CallLogEntry(
+                name = parameter.name,
+                number = parameter.number,
+                timestamp = parameter.timestamp
+            )
+        )
     }
 
     class Params(

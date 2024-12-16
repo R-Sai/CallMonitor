@@ -3,7 +3,6 @@ package com.ramzisai.callmonitor.presentation.service
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
-import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.os.Build
@@ -16,20 +15,15 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import com.ramzisai.callmonitor.R
 import com.ramzisai.callmonitor.domain.usecase.SaveCallLogUseCase
+import com.ramzisai.callmonitor.presentation.Constants.FOREGROUND_SERVICE_CHANNEL
 import com.ramzisai.callmonitor.presentation.MainActivity
 import com.ramzisai.callmonitor.presentation.util.AndroidCallLogUtil
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class CallMonitorService: Service() {
-
-    private val serviceJob = SupervisorJob()
-    private val serviceScope = CoroutineScope(Dispatchers.IO + serviceJob)
+class CallMonitorService: ScopedService() {
 
     private lateinit var telephonyManager: TelephonyManager
     private var telephonyCallback: TelephonyCallbackImpl? = null
@@ -81,7 +75,6 @@ class CallMonitorService: Service() {
     override fun onDestroy() {
         super.onDestroy()
         Log.i(TAG, "onDestroy")
-        serviceJob.cancel()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             telephonyCallback?.let {
                 telephonyManager.unregisterTelephonyCallback(it)
@@ -89,18 +82,6 @@ class CallMonitorService: Service() {
             telephonyCallback = null
         } else {
             telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_NONE)
-        }
-    }
-
-    private fun createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                FOREGROUND_SERVICE_CHANNEL,
-                SERVICE_NAME,
-                NotificationManager.IMPORTANCE_LOW
-            )
-            val notificationManager = getSystemService(NotificationManager::class.java)
-            notificationManager?.createNotificationChannel(channel)
         }
     }
 
@@ -124,6 +105,18 @@ class CallMonitorService: Service() {
         startForeground(FOREGROUND_SERVICE_ID, notification)
     }
 
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                FOREGROUND_SERVICE_CHANNEL,
+                getString(R.string.app_name),
+                NotificationManager.IMPORTANCE_LOW
+            )
+            val notificationManager = getSystemService(NotificationManager::class.java)
+            notificationManager?.createNotificationChannel(channel)
+        }
+    }
+
     fun createNewCallLogEntry(contact: Pair<String?, String?>) {
         val (number, name) = contact
 
@@ -140,8 +133,6 @@ class CallMonitorService: Service() {
 
     companion object {
         val TAG = CallMonitorService::class.simpleName
-        val FOREGROUND_SERVICE_ID = 1000
-        val FOREGROUND_SERVICE_CHANNEL = "com.ramzisai.callmonitor.presentation.service.CallMonitorService.FOREGROUND_SERVICE_CHANNEL"
-        val SERVICE_NAME = "com.ramzisai.callmonitor.presentation.service.CallMonitorService"
+        const val FOREGROUND_SERVICE_ID = 1000
     }
 }

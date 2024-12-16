@@ -3,6 +3,7 @@
 
     <string name="label_server_status_stopped">Server stopped</string>
     <string name="label_call_log">Call log</string>
+    <string name="label_unknown">N/A</string>
 
     <string name="button_start_server">Start server</string>
     <string name="button_stop_server">Stop server</string>
@@ -10,4 +11,5 @@
     <string name="error_permissions">Not all required permissions are enabled</string>
 
     <string name="notification_call_monitor_service_running">Call monitor service running</string>
+    <string name="notification_call_server_service_running">Server service running</string>
 </resources>
