@@ -4,30 +4,34 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.ramzisai.callmonitor.domain.model.CallLogEntry
+import com.ramzisai.callmonitor.domain.usecase.GetCallLogUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    application: Application
+    application: Application,
+    val getCallLogUseCase: GetCallLogUseCase
 ) : AndroidViewModel(application) {
 
     private val _callLog = MutableStateFlow<List<CallLogEntry>>(emptyList())
-    val callLog = _callLog.asStateFlow()
+    val callLog: StateFlow<List<CallLogEntry>> = _callLog
 
-    fun loadCallLog() {
-        viewModelScope.launch {
-            _callLog.value = List(10) {
-                CallLogEntry(
-                    timestamp = 12345,
-                    duration = 12345L,
-                    number = "123-456-789",
-                    name = "John Doe",
-                    timesQueried = 1,
-                )
+    private var callLogJob: Job? = null
+
+    init {
+        loadCallLog()
+    }
+
+    private fun loadCallLog() {
+        callLogJob?.cancel()
+        callLogJob = viewModelScope.launch {
+            getCallLogUseCase(Unit).collect { callLog ->
+                _callLog.value = callLog
             }
         }
     }

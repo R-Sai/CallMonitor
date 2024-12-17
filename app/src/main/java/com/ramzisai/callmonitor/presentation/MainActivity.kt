@@ -21,9 +21,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.core.content.ContextCompat
 import com.ramzisai.callmonitor.R
+import com.ramzisai.callmonitor.presentation.Constants.SERVER.SERVER_PORT
 import com.ramzisai.callmonitor.presentation.service.CallMonitorService
 import com.ramzisai.callmonitor.presentation.service.ServerService
 import com.ramzisai.callmonitor.presentation.ui.screens.MainScreen
@@ -113,7 +113,7 @@ fun CallMonitorApp(
 ) {
     val context = LocalContext.current
     val callLog by viewModel.callLog.collectAsState()
-    val address by rememberSaveable { mutableStateOf(NetworkUtil.getWifiIpAddress(context)) }
+    val address by rememberSaveable { mutableStateOf("http://${NetworkUtil.getWifiIpAddress(context)}:$SERVER_PORT") }
 
     Surface(
         modifier = modifier,
@@ -121,7 +121,7 @@ fun CallMonitorApp(
     ) {
         MainScreen(
             callLog = callLog,
-            address = address ?: stringResource(R.string.label_unknown),
+            address = address,
             onStartServerClicked = onStartServerClicked
         )
     }

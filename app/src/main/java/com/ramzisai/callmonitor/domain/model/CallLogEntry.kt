@@ -5,5 +5,6 @@ data class CallLogEntry(
     val duration: Long = 0,
     val number: String?,
     val name: String?,
-    var timesQueried: Int = 0
+    var timesQueried: Int = 0,
+    var isOngoing: Boolean
 )

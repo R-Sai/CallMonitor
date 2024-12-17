@@ -10,7 +10,8 @@ class CallLogMapper {
             duration = callLogEntity.duration,
             number = callLogEntity.number,
             name = callLogEntity.name,
-            timesQueried = callLogEntity.timesQueried
+            timesQueried = callLogEntity.timesQueried,
+            isOngoing = callLogEntity.isOngoing
         )
 
     fun map(callLogEntry: CallLogEntry) =
@@ -19,6 +20,7 @@ class CallLogMapper {
             duration = callLogEntry.duration,
             number = callLogEntry.number,
             name = callLogEntry.name,
-            timesQueried = callLogEntry.timesQueried
+            timesQueried = callLogEntry.timesQueried,
+            isOngoing = callLogEntry.isOngoing
         )
 }

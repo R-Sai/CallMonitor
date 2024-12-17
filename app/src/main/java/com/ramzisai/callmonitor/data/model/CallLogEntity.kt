@@ -12,7 +12,8 @@ data class CallLogEntity(
     @ColumnInfo(name = COLUMN_NUMBER) val number: String?,
     @ColumnInfo(name = COLUMN_NAME) val name: String?,
     @ColumnInfo(name = COLUMN_DURATION) val duration: Long,
-    @ColumnInfo(name = COLUMN_TIMES_QUERIED) var timesQueried: Int = 0
+    @ColumnInfo(name = COLUMN_TIMES_QUERIED) var timesQueried: Int = 0,
+    @ColumnInfo(name = COLUMN_IS_ONGOING) var isOngoing: Boolean
 ) {
     companion object {
         const val TABLE_NAME = "CallLogEntity"
@@ -21,5 +22,6 @@ data class CallLogEntity(
         const val COLUMN_NAME = "name"
         const val COLUMN_DURATION = "duration"
         const val COLUMN_TIMES_QUERIED = "timesQueried"
+        const val COLUMN_IS_ONGOING = "isOngoing"
     }
 }

@@ -8,13 +8,12 @@ import android.content.Intent
 import android.os.Build
 import android.os.IBinder
 import android.telephony.PhoneStateListener
-import android.telephony.TelephonyCallback
 import android.telephony.TelephonyManager
 import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import com.ramzisai.callmonitor.R
 import com.ramzisai.callmonitor.domain.usecase.SaveCallLogUseCase
+import com.ramzisai.callmonitor.domain.usecase.UpdateCallLogOngoingUseCase
 import com.ramzisai.callmonitor.presentation.Constants.FOREGROUND_SERVICE_CHANNEL
 import com.ramzisai.callmonitor.presentation.MainActivity
 import com.ramzisai.callmonitor.presentation.util.AndroidCallLogUtil
@@ -26,27 +25,39 @@ import javax.inject.Inject
 class CallMonitorService : ScopedService() {
 
     private lateinit var telephonyManager: TelephonyManager
-    private var telephonyCallback: TelephonyCallbackImpl? = null
+    private var currentCallId: Long? = null
 
     @Inject
     lateinit var saveCallLogUseCase: SaveCallLogUseCase
 
-    @RequiresApi(Build.VERSION_CODES.S)
-    private inner class TelephonyCallbackImpl : TelephonyCallback(), TelephonyCallback.CallStateListener {
-        override fun onCallStateChanged(state: Int) {
-            Log.d(TAG, "onCallStateChanged - state: $state")
-            when (state) {
-                TelephonyManager.CALL_STATE_OFFHOOK,
-                TelephonyManager.CALL_STATE_RINGING -> createNewCallLogEntry(AndroidCallLogUtil.getPhoneNumberFromLog(this@CallMonitorService))
-            }
-        }
-    }
+    @Inject
+    lateinit var updateCallLogOngoingUseCase: UpdateCallLogOngoingUseCase
 
     @Suppress("DEPRECATION")
     private val phoneStateListener = object : PhoneStateListener() {
         @Suppress("OVERRIDE_DEPRECATION")
         override fun onCallStateChanged(state: Int, phoneNumber: String?) {
-            Log.d(TAG, "onCallStateChanged - state: $state, phoneNumber: $phoneNumber")
+            val name = phoneNumber
+                .takeUnless { it.isNullOrEmpty() }
+                ?.let { AndroidCallLogUtil.getContactName(this@CallMonitorService, it) }
+            when (state) {
+                TelephonyManager.CALL_STATE_OFFHOOK -> {
+                    currentCallId?.let {
+                        updateCurrentCallState(it, isOngoing = true)
+                    } ?: createNewCallLogEntry(phoneNumber, name)
+                }
+
+                TelephonyManager.CALL_STATE_RINGING -> {
+                    createNewCallLogEntry(phoneNumber, name)
+                }
+
+                TelephonyManager.CALL_STATE_IDLE -> {
+                    currentCallId?.let {
+                        updateCurrentCallState(it, isOngoing = false)
+                    }
+                    currentCallId = null
+                }
+            }
         }
     }
 
@@ -55,12 +66,7 @@ class CallMonitorService : ScopedService() {
         Log.i(TAG, "onCreate")
         startForegroundServiceNotification()
         telephonyManager = getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            telephonyCallback = TelephonyCallbackImpl()
-            telephonyCallback?.let { telephonyManager.registerTelephonyCallback(baseContext.mainExecutor, it) }
-        } else {
-            telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_CALL_STATE)
-        }
+        telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_CALL_STATE)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -75,14 +81,7 @@ class CallMonitorService : ScopedService() {
     override fun onDestroy() {
         super.onDestroy()
         Log.i(TAG, "onDestroy")
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            telephonyCallback?.let {
-                telephonyManager.unregisterTelephonyCallback(it)
-            }
-            telephonyCallback = null
-        } else {
-            telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_NONE)
-        }
+        telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_NONE)
     }
 
     private fun startForegroundServiceNotification() {
@@ -117,15 +116,26 @@ class CallMonitorService : ScopedService() {
         }
     }
 
-    fun createNewCallLogEntry(contact: Pair<String?, String?>) {
-        val (number, name) = contact
-
+    fun createNewCallLogEntry(number: String?, name: String?) {
         serviceScope.launch {
             saveCallLogUseCase(
                 SaveCallLogUseCase.Params(
                     name = name,
                     number = number,
                     timestamp = System.currentTimeMillis()
+                )
+            ).collect { id ->
+                currentCallId = id
+            }
+        }
+    }
+
+    fun updateCurrentCallState(callId: Long, isOngoing: Boolean) {
+        serviceScope.launch {
+            updateCallLogOngoingUseCase(
+                UpdateCallLogOngoingUseCase.Params(
+                    id = callId,
+                    isOngoing = isOngoing
                 )
             )
         }

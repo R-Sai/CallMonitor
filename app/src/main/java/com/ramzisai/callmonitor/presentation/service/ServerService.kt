@@ -9,9 +9,14 @@ import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.ramzisai.callmonitor.R
+import com.ramzisai.callmonitor.domain.usecase.GetOngoingCallUseCase
 import com.ramzisai.callmonitor.presentation.Constants.FOREGROUND_SERVICE_CHANNEL
+import com.ramzisai.callmonitor.presentation.Constants.SERVER.ROUTE_ROOT
+import com.ramzisai.callmonitor.presentation.Constants.SERVER.ROUTE_STATUS
+import com.ramzisai.callmonitor.presentation.Constants.SERVER.SERVER_PORT
 import com.ramzisai.callmonitor.presentation.MainActivity
 import com.ramzisai.callmonitor.presentation.model.RootResponse
+import com.ramzisai.callmonitor.presentation.model.StatusResponse
 import com.ramzisai.callmonitor.presentation.util.NetworkUtil
 import dagger.hilt.android.AndroidEntryPoint
 import io.ktor.serialization.kotlinx.json.json
@@ -24,13 +29,18 @@ import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.response.respond
 import io.ktor.server.routing.get
 import io.ktor.server.routing.routing
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.serialization.json.Json
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class ServerService : ScopedService() {
 
     private var server: EmbeddedServer<NettyApplicationEngine, NettyApplicationEngine.Configuration>? = null
     var startTime: Long? = null
+
+    @Inject
+    lateinit var getOngoingCallUseCase: GetOngoingCallUseCase
 
     override fun onCreate() {
         super.onCreate()
@@ -90,7 +100,7 @@ class ServerService : ScopedService() {
     }
 
     private fun startWebServer() {
-        server = embeddedServer(Netty, port = PORT, host = "0.0.0.0") {
+        server = embeddedServer(Netty, port = SERVER_PORT, host = "0.0.0.0") {
             install(ContentNegotiation) {
                 json(Json {
                     prettyPrint = true
@@ -99,12 +109,22 @@ class ServerService : ScopedService() {
             }
 
             routing {
-                get("/") {
+                get(ROUTE_ROOT) {
                     call.respond(
                         RootResponse.create(
                             start = startTime,
-                            port = PORT,
+                            port = SERVER_PORT,
                             address = NetworkUtil.getWifiIpAddress(this@ServerService)
+                        )
+                    )
+                }
+                get(ROUTE_STATUS) {
+                    val onGoingCall = getOngoingCallUseCase(Unit).firstOrNull()
+                    call.respond(
+                        StatusResponse(
+                            onGoing = onGoingCall?.isOngoing ?: false,
+                            number = onGoingCall?.number,
+                            name = onGoingCall?.name
                         )
                     )
                 }
@@ -117,6 +137,5 @@ class ServerService : ScopedService() {
     companion object {
         val TAG = ServerService::class.simpleName
         const val FOREGROUND_SERVICE_ID = 1010
-        const val PORT = 12345
     }
 }

@@ -11,4 +11,10 @@ object DateUtil {
         val formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME
         return formatter.format(instant)
     }
+
+    fun formatPretty(timestamp: Long): String {
+        val instant = Instant.ofEpochMilli(timestamp).atZone(ZoneId.systemDefault())
+        val formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
+        return formatter.format(instant)
+    }
 }

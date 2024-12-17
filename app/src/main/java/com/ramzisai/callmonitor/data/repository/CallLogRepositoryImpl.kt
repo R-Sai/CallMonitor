@@ -5,6 +5,7 @@ import com.ramzisai.callmonitor.data.mapper.CallLogMapper
 import com.ramzisai.callmonitor.domain.model.CallLogEntry
 import com.ramzisai.callmonitor.domain.repository.CallLogRepository
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
@@ -13,13 +14,17 @@ class CallLogRepositoryImpl @Inject constructor(
     private val mapper: CallLogMapper
 ) : CallLogRepository {
 
-    override suspend fun putCallLog(callLog: CallLogEntry) {
-        dao.insert(mapper.map(callLog))
+    override suspend fun putCallLog(callLog: CallLogEntry): Flow<Long> {
+        return flowOf(dao.insert(mapper.map(callLog)))
     }
 
-    override fun getCallLog(): Flow<List<CallLogEntry>> {
+    override suspend fun getCallLog(): Flow<List<CallLogEntry>> {
         return dao.getCallLogs().map { entities ->
             entities.map { mapper.map(it) }
         }
+    }
+
+    override suspend fun updateCallLogOngoing(id: Long, isOngoing: Boolean) {
+        return dao.updateCallLogOnGoing(id, isOngoing)
     }
 }

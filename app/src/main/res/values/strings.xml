@@ -2,8 +2,9 @@
     <string name="app_name">Call Monitor</string>
 
     <string name="label_server_status_stopped">Server stopped</string>
+    <string name="label_server_status_running">Server running</string>
     <string name="label_call_log">Call log</string>
-    <string name="label_unknown">N/A</string>
+    <string name="label_unknown">Unknown</string>
 
     <string name="button_start_server">Start server</string>
     <string name="button_stop_server">Stop server</string>
