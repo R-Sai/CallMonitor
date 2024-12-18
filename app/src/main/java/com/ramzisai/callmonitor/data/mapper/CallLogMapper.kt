@@ -6,6 +6,7 @@ import com.ramzisai.callmonitor.domain.model.CallLogEntry
 class CallLogMapper {
     fun map(callLogEntity: CallLogEntity) =
         CallLogEntry(
+            id = callLogEntity.id,
             timestamp = callLogEntity.timestamp,
             duration = callLogEntity.duration,
             number = callLogEntity.number,
@@ -16,6 +17,7 @@ class CallLogMapper {
 
     fun map(callLogEntry: CallLogEntry) =
         CallLogEntity(
+            id = callLogEntry.id,
             timestamp = callLogEntry.timestamp,
             duration = callLogEntry.duration,
             number = callLogEntry.number,

@@ -24,11 +24,16 @@ class CallLogRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun updateCallLogs(callLogs: List<CallLogEntry>) {
+        val callLogEntities = callLogs.map(mapper::map)
+        dao.updateCallLogs(callLogEntities)
+    }
+
     override suspend fun updateCallLogOngoing(callId: Long, isOngoing: Boolean) {
         dao.updateCallLogOnGoing(callId, isOngoing)
     }
 
     override suspend fun updateCallLogDuration(callId: Long, duration: Long) {
-        dao.updateCallLogOnDuration(callId, duration)
+        dao.updateCallLogDuration(callId, duration)
     }
 }

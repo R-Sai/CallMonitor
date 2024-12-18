@@ -9,12 +9,15 @@ import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.ramzisai.callmonitor.R
+import com.ramzisai.callmonitor.domain.usecase.GetCallLogAndUpdateQueriedUseCase
 import com.ramzisai.callmonitor.domain.usecase.GetOngoingCallUseCase
 import com.ramzisai.callmonitor.presentation.Constants.FOREGROUND_SERVICE_CHANNEL
+import com.ramzisai.callmonitor.presentation.Constants.SERVER.ROUTE_LOG
 import com.ramzisai.callmonitor.presentation.Constants.SERVER.ROUTE_ROOT
 import com.ramzisai.callmonitor.presentation.Constants.SERVER.ROUTE_STATUS
 import com.ramzisai.callmonitor.presentation.Constants.SERVER.SERVER_PORT
 import com.ramzisai.callmonitor.presentation.MainActivity
+import com.ramzisai.callmonitor.presentation.model.LogResponse
 import com.ramzisai.callmonitor.presentation.model.RootResponse
 import com.ramzisai.callmonitor.presentation.model.StatusResponse
 import com.ramzisai.callmonitor.presentation.util.NetworkUtil
@@ -41,6 +44,9 @@ class ServerService : ScopedService() {
 
     @Inject
     lateinit var getOngoingCallUseCase: GetOngoingCallUseCase
+
+    @Inject
+    lateinit var getCallLogAndUpdateQueriedUseCase: GetCallLogAndUpdateQueriedUseCase
 
     override fun onCreate() {
         super.onCreate()
@@ -126,6 +132,12 @@ class ServerService : ScopedService() {
                             number = onGoingCall?.number,
                             name = onGoingCall?.name
                         )
+                    )
+                }
+                get(ROUTE_LOG) {
+                    val callLog = getCallLogAndUpdateQueriedUseCase(Unit).firstOrNull()
+                    call.respond(
+                        LogResponse.create(callLog)
                     )
                 }
             }

@@ -3,11 +3,14 @@ package com.ramzisai.callmonitor.presentation.model
 import com.ramzisai.callmonitor.presentation.Constants.SERVER.ROUTE_LOG
 import com.ramzisai.callmonitor.presentation.Constants.SERVER.ROUTE_STATUS
 import com.ramzisai.callmonitor.presentation.util.DateUtil
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class RootResponse(
+    @SerialName("start")
     val start: String,
+    @SerialName("services")
     val services: List<Service>
 ) {
     companion object {

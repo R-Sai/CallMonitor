@@ -4,7 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.ramzisai.callmonitor.domain.model.CallLogEntry
-import com.ramzisai.callmonitor.domain.usecase.GetCallLogUseCase
+import com.ramzisai.callmonitor.domain.usecase.ObserveCallLogUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,7 +15,7 @@ import javax.inject.Inject
 @HiltViewModel
 class MainViewModel @Inject constructor(
     application: Application,
-    val getCallLogUseCase: GetCallLogUseCase
+    val observeCallLogUseCase: ObserveCallLogUseCase
 ) : AndroidViewModel(application) {
 
     private val _callLog = MutableStateFlow<List<CallLogEntry>>(emptyList())
@@ -30,7 +30,7 @@ class MainViewModel @Inject constructor(
     private fun loadCallLog() {
         callLogJob?.cancel()
         callLogJob = viewModelScope.launch {
-            getCallLogUseCase(Unit).collect { callLog ->
+            observeCallLogUseCase(Unit).collect { callLog ->
                 _callLog.value = callLog
             }
         }
