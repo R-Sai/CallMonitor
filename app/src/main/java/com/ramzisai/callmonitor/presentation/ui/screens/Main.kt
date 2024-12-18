@@ -1,11 +1,15 @@
 package com.ramzisai.callmonitor.presentation.ui.screens
 
+import androidx.annotation.DrawableRes
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
@@ -19,7 +23,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -77,7 +82,6 @@ fun ServerControlCard(
     isServerRunning: Boolean,
     onServerButtonClicked: () -> Unit,
 ) {
-    val context = LocalContext.current
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -150,34 +154,70 @@ fun CallLogItem(
     Card(
         modifier = modifier.fillMaxWidth()
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Text(
-                text = entry.name.takeUnless { it.isNullOrEmpty() } ?: stringResource(R.string.label_unknown),
-                style = MaterialTheme.typography.titleMedium
+        Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+            Image(
+                painterResource(R.drawable.ic_call_36),
+                contentDescription = null,
+                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary)
             )
-            Text(
-                text = entry.number ?: stringResource(R.string.label_unknown),
-                style = MaterialTheme.typography.titleSmall
-            )
-
-            Spacer(modifier = Modifier.height(4.dp))
-
-            Text(
-                text = DateUtil.formatPretty(entry.timestamp),
-                style = MaterialTheme.typography.bodyMedium
-            )
-
-            Text(
-                text = "${entry.duration}",
-                style = MaterialTheme.typography.bodyMedium
-            )
-
-            Text(
-                text = "${entry.timesQueried}",
-                style = MaterialTheme.typography.bodySmall
-            )
+            Spacer(Modifier.width(16.dp))
+            Column(
+                modifier = Modifier.weight(1f),
+                horizontalAlignment = Alignment.Start,
+            ) {
+                Text(
+                    text = entry.name.takeUnless { it.isNullOrEmpty() } ?: stringResource(R.string.label_unknown),
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = entry.number ?: stringResource(R.string.label_unknown),
+                    style = MaterialTheme.typography.titleSmall
+                )
+            }
+            Column(
+                modifier = Modifier.weight(1f),
+                horizontalAlignment = Alignment.End
+            ) {
+                CallLogItemDetail(
+                    text = DateUtil.formatDuration(entry.duration),
+                    resource = R.drawable.ic_duration_16
+                )
+            }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun CallLogItemPreview() {
+    CallLogItem(
+        entry = CallLogEntry(
+            number = "695436313",
+            name = "Ramzi Sai",
+            timestamp = 1734557921434,
+            duration = 260,
+            isOngoing = false
+        )
+    )
+}
+
+@Composable
+fun CallLogItemDetail(
+    modifier: Modifier = Modifier,
+    text: String,
+    @DrawableRes resource: Int,
+) {
+    Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodyLarge
+        )
+        Spacer(Modifier.width(4.dp))
+        Image(
+            painter = painterResource(resource),
+            contentDescription = null,
+            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary)
+        )
     }
 }
