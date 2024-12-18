@@ -89,7 +89,6 @@ class ServerService : ScopedService() {
             .setContentTitle(getString(R.string.notification_call_server_service_running))
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .setCategory(NotificationCompat.CATEGORY_SERVICE)
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setContentIntent(pendingIntent)
             .build()
 

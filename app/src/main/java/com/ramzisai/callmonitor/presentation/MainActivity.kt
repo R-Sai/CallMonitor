@@ -26,7 +26,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.core.content.ContextCompat
+import androidx.core.app.ActivityCompat
 import com.ramzisai.callmonitor.R
 import com.ramzisai.callmonitor.presentation.Constants.SERVER.SERVER_PORT
 import com.ramzisai.callmonitor.presentation.service.CallMonitorService
@@ -73,16 +73,22 @@ class MainActivity : ComponentActivity() {
         if (allGranted) {
             startCallMonitorService()
         } else {
-            Toast.makeText(this, getString(R.string.error_permissions), Toast.LENGTH_LONG).show()
+            checkAndRequestPermissions()
         }
     }
 
     private fun checkAndRequestPermissions() {
         val permissionsToRequest = requiredPermissions.filter {
-            ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
+            ActivityCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
         }.toTypedArray()
 
-        if (permissionsToRequest.isEmpty()) {
+        val showPermissionRationale = permissionsToRequest.any {
+            ActivityCompat.shouldShowRequestPermissionRationale(this, it)
+        }
+
+        if (showPermissionRationale) {
+            Toast.makeText(this, getString(R.string.error_permissions), Toast.LENGTH_LONG).show()
+        } else if (permissionsToRequest.isEmpty()) {
             startCallMonitorService()
         } else {
             permissionLauncher.launch(permissionsToRequest)
