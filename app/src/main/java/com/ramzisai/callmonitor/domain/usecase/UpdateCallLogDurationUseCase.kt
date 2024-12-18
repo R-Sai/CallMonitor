@@ -3,18 +3,18 @@ package com.ramzisai.callmonitor.domain.usecase
 import com.ramzisai.callmonitor.domain.repository.CallLogRepository
 import javax.inject.Inject
 
-class UpdateCallLogOngoingUseCase @Inject constructor(
+class UpdateCallLogDurationUseCase @Inject constructor(
     private val repository: CallLogRepository
-) : NoResultUseCase<UpdateCallLogOngoingUseCase.Params> {
+) : NoResultUseCase<UpdateCallLogDurationUseCase.Params> {
     override suspend fun invoke(parameter: Params) {
-        return repository.updateCallLogOngoing(
+        return repository.updateCallLogDuration(
             callId = parameter.id,
-            isOngoing = parameter.isOngoing
+            duration = parameter.duration
         )
     }
 
     class Params(
         val id: Long,
-        val isOngoing: Boolean
+        val duration: Long
     )
 }

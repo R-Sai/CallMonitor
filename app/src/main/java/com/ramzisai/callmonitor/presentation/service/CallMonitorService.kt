@@ -13,6 +13,7 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.ramzisai.callmonitor.R
 import com.ramzisai.callmonitor.domain.usecase.SaveCallLogUseCase
+import com.ramzisai.callmonitor.domain.usecase.UpdateCallLogDurationUseCase
 import com.ramzisai.callmonitor.domain.usecase.UpdateCallLogOngoingUseCase
 import com.ramzisai.callmonitor.presentation.Constants.FOREGROUND_SERVICE_CHANNEL
 import com.ramzisai.callmonitor.presentation.MainActivity
@@ -26,12 +27,16 @@ class CallMonitorService : ScopedService() {
 
     private lateinit var telephonyManager: TelephonyManager
     private var currentCallId: Long? = null
+    private var currentCallStartTime: Long? = null
 
     @Inject
     lateinit var saveCallLogUseCase: SaveCallLogUseCase
 
     @Inject
     lateinit var updateCallLogOngoingUseCase: UpdateCallLogOngoingUseCase
+
+    @Inject
+    lateinit var updateCallLogDurationUseCase: UpdateCallLogDurationUseCase
 
     @Suppress("DEPRECATION")
     private val phoneStateListener = object : PhoneStateListener() {
@@ -42,20 +47,18 @@ class CallMonitorService : ScopedService() {
                 ?.let { AndroidCallLogUtil.getContactName(this@CallMonitorService, it) }
             when (state) {
                 TelephonyManager.CALL_STATE_OFFHOOK -> {
+                    currentCallStartTime = System.currentTimeMillis()
                     currentCallId?.let {
                         updateCurrentCallState(it, isOngoing = true)
-                    } ?: createNewCallLogEntry(phoneNumber, name)
+                    } ?: createNewCallLogEntry(number = phoneNumber, name = name)
                 }
 
                 TelephonyManager.CALL_STATE_RINGING -> {
-                    createNewCallLogEntry(phoneNumber, name)
+                    createNewCallLogEntry(number = phoneNumber, name = name)
                 }
 
                 TelephonyManager.CALL_STATE_IDLE -> {
-                    currentCallId?.let {
-                        updateCurrentCallState(it, isOngoing = false)
-                    }
-                    currentCallId = null
+                    onCallEnded()
                 }
             }
         }
@@ -117,12 +120,13 @@ class CallMonitorService : ScopedService() {
     }
 
     fun createNewCallLogEntry(number: String?, name: String?) {
+        val startTime = System.currentTimeMillis()
         serviceScope.launch {
             saveCallLogUseCase(
                 SaveCallLogUseCase.Params(
                     name = name,
                     number = number,
-                    timestamp = System.currentTimeMillis()
+                    timestamp = startTime
                 )
             ).collect { id ->
                 currentCallId = id
@@ -135,7 +139,28 @@ class CallMonitorService : ScopedService() {
             updateCallLogOngoingUseCase(
                 UpdateCallLogOngoingUseCase.Params(
                     id = callId,
-                    isOngoing = isOngoing
+                    isOngoing = isOngoing,
+                )
+            )
+        }
+    }
+
+    private fun onCallEnded() {
+        val duration = currentCallStartTime?.let { (System.currentTimeMillis() - it) / 1000 }
+        currentCallId?.let { callId ->
+            updateCurrentCallState(callId, isOngoing = false)
+            duration?.let { updateCurrentCallDuration(callId, duration = it) }
+        }
+        currentCallId = null
+        currentCallStartTime = null
+    }
+
+    private fun updateCurrentCallDuration(callId: Long, duration: Long) {
+        serviceScope.launch {
+            updateCallLogDurationUseCase(
+                UpdateCallLogDurationUseCase.Params(
+                    id = callId,
+                    duration = duration,
                 )
             )
         }

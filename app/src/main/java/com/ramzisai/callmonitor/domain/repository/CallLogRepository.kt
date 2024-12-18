@@ -6,5 +6,6 @@ import kotlinx.coroutines.flow.Flow
 interface CallLogRepository {
     suspend fun putCallLog(callLog: CallLogEntry): Flow<Long>
     suspend fun getCallLog(): Flow<List<CallLogEntry>>
-    suspend fun updateCallLogOngoing(id: Long, isOngoing: Boolean)
+    suspend fun updateCallLogOngoing(callId: Long, isOngoing: Boolean)
+    suspend fun updateCallLogDuration(callId: Long, duration: Long)
 }

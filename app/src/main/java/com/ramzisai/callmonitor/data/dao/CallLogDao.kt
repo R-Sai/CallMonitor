@@ -17,4 +17,7 @@ interface CallLogDao {
 
     @Query("UPDATE ${CallLogEntity.TABLE_NAME} SET ${CallLogEntity.COLUMN_IS_ONGOING} = :isOngoing WHERE id = :id")
     suspend fun updateCallLogOnGoing(id: Long, isOngoing: Boolean)
+
+    @Query("UPDATE ${CallLogEntity.TABLE_NAME} SET ${CallLogEntity.COLUMN_DURATION} = :duration WHERE id = :id")
+    suspend fun updateCallLogOnDuration(id: Long, duration: Long)
 }

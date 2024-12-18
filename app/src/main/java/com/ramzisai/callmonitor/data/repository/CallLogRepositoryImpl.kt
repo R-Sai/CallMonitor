@@ -24,7 +24,11 @@ class CallLogRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun updateCallLogOngoing(id: Long, isOngoing: Boolean) {
-        return dao.updateCallLogOnGoing(id, isOngoing)
+    override suspend fun updateCallLogOngoing(callId: Long, isOngoing: Boolean) {
+        dao.updateCallLogOnGoing(callId, isOngoing)
+    }
+
+    override suspend fun updateCallLogDuration(callId: Long, duration: Long) {
+        dao.updateCallLogOnDuration(callId, duration)
     }
 }
