@@ -4,6 +4,7 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Intent
+import android.os.Binder
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
@@ -33,11 +34,14 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.get
 import io.ktor.server.routing.routing
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class ServerService : ScopedService() {
+
+    private val binder: ServerServiceBinder = ServerServiceBinder()
 
     private var server: EmbeddedServer<NettyApplicationEngine, NettyApplicationEngine.Configuration>? = null
     var startTime: Long? = null
@@ -63,14 +67,13 @@ class ServerService : ScopedService() {
         return START_STICKY
     }
 
-    override fun onBind(p0: Intent?): IBinder? {
-        TODO("Not yet implemented")
+    override fun onBind(int: Intent?): IBinder {
+        return binder
     }
 
     override fun onDestroy() {
         super.onDestroy()
         Log.i(TAG, "onDestroy")
-        server?.stop(1000, 2000)
     }
 
     private fun startForegroundServiceNotification() {
@@ -144,6 +147,20 @@ class ServerService : ScopedService() {
 
         }.start(wait = false)
         Log.i(TAG, "Server started successfully")
+    }
+
+    inner class ServerServiceBinder : Binder() {
+        fun stopServer() {
+            serviceScope.launch {
+                server?.stop(10, 100)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    stopForeground(STOP_FOREGROUND_REMOVE)
+                } else {
+                    stopForeground(true)
+                }
+                stopSelf()
+            }
+        }
     }
 
     companion object {

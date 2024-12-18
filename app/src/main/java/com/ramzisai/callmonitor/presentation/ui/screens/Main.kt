@@ -1,6 +1,5 @@
 package com.ramzisai.callmonitor.presentation.ui.screens
 
-import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -35,7 +34,7 @@ fun MainScreen(
     modifier: Modifier = Modifier,
     callLog: List<CallLogEntry>,
     address: String,
-    onStartServerClicked: () -> Unit,
+    onServerButtonClicked: (Boolean) -> Unit,
 ) {
     var isServerRunning by rememberSaveable { mutableStateOf(false) }
 
@@ -44,8 +43,8 @@ fun MainScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         ServerControlCard(address = address, isServerRunning = isServerRunning) {
-            onStartServerClicked()
             isServerRunning = !isServerRunning
+            onServerButtonClicked(isServerRunning)
         }
 
         CallLog(callLog = callLog)
@@ -67,7 +66,7 @@ fun MainScreenPreview() {
             )
         ),
         address = "192.10.0.1",
-        onStartServerClicked = {},
+        onServerButtonClicked = {},
     )
 }
 
@@ -76,7 +75,7 @@ fun ServerControlCard(
     modifier: Modifier = Modifier,
     address: String,
     isServerRunning: Boolean,
-    onStartServerClicked: () -> Unit,
+    onServerButtonClicked: () -> Unit,
 ) {
     val context = LocalContext.current
     Card(
@@ -104,12 +103,13 @@ fun ServerControlCard(
 
             Button(
                 onClick = {
-                    Toast.makeText(context, "TODO Starting server", Toast.LENGTH_SHORT).show()
-                    onStartServerClicked()
+                    onServerButtonClicked()
                 },
                 modifier = Modifier.padding(top = 8.dp)
             ) {
-                Text(stringResource(R.string.button_start_server))
+                Text(
+                    text = if (isServerRunning) stringResource(R.string.button_stop_server) else stringResource(R.string.button_start_server)
+                )
             }
         }
     }

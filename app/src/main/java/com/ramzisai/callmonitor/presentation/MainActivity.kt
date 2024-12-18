@@ -2,10 +2,15 @@ package com.ramzisai.callmonitor.presentation
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
+import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.os.IBinder
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -36,6 +41,22 @@ import dagger.hilt.android.AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     private val viewModel: MainViewModel by viewModels()
+    private var serviceBinder: ServerService.ServerServiceBinder? = null
+    private var isServiceBound: Boolean = false
+
+    private val serviceConnection = object : ServiceConnection {
+        override fun onServiceConnected(componentName: ComponentName?, binder: IBinder?) {
+            serviceBinder = binder as ServerService.ServerServiceBinder?
+            isServiceBound = true
+            Log.d(TAG, "onServiceConnected")
+        }
+
+        override fun onServiceDisconnected(componentName: ComponentName?) {
+            isServiceBound = false
+            Log.d(TAG, "onServiceDisconnected")
+        }
+
+    }
 
     @SuppressLint("InlinedApi")
     private val requiredPermissions = arrayOf(
@@ -84,6 +105,14 @@ class MainActivity : ComponentActivity() {
         } else {
             startService(intent)
         }
+        bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
+    }
+
+    private fun stopServerService() {
+        if (isServiceBound) {
+            serviceBinder?.stopServer()
+            unbindService(serviceConnection)
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -93,7 +122,8 @@ class MainActivity : ComponentActivity() {
                 CallMonitorApp(
                     modifier = Modifier.fillMaxSize(),
                     viewModel = viewModel,
-                    onStartServerClicked = { startServerService() }
+                    onStartServer = { startServerService() },
+                    onStopServer = { stopServerService() }
                 )
             }
         }
@@ -103,13 +133,18 @@ class MainActivity : ComponentActivity() {
         super.onResume()
         checkAndRequestPermissions()
     }
+
+    companion object {
+        val TAG = MainActivity::class.simpleName
+    }
 }
 
 @Composable
 fun CallMonitorApp(
     modifier: Modifier = Modifier,
     viewModel: MainViewModel,
-    onStartServerClicked: () -> Unit
+    onStartServer: () -> Unit,
+    onStopServer: () -> Unit
 ) {
     val context = LocalContext.current
     val callLog by viewModel.callLog.collectAsState()
@@ -122,7 +157,13 @@ fun CallMonitorApp(
         MainScreen(
             callLog = callLog,
             address = address,
-            onStartServerClicked = onStartServerClicked
+            onServerButtonClicked = { isServerRunning ->
+                if (isServerRunning) {
+                    onStartServer()
+                } else {
+                    onStopServer()
+                }
+            }
         )
     }
 }
