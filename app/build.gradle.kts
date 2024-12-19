@@ -92,6 +92,9 @@ dependencies {
     testImplementation("io.mockk:mockk-android:1.13.13")
     testImplementation("io.mockk:mockk-agent:1.13.13")
 
+    androidTestImplementation(platform("androidx.compose:compose-bom:2024.12.01"))
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
+
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 }
