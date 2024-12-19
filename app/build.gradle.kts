@@ -87,6 +87,10 @@ dependencies {
     implementation("com.jakewharton.threetenabp:threetenabp:1.4.8")
 
     testImplementation("junit:junit:4.13.2")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0")
+    testImplementation("io.mockk:mockk:1.13.13")
+    testImplementation("io.mockk:mockk-android:1.13.13")
+    testImplementation("io.mockk:mockk-agent:1.13.13")
 
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
