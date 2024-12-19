@@ -1,4 +1,4 @@
-package com.ramzisai.callmonitor.ui.theme
+package com.ramzisai.callmonitor.presentation.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

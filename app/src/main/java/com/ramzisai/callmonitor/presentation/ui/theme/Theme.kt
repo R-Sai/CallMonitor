@@ -1,6 +1,5 @@
-package com.ramzisai.callmonitor.ui.theme
+package com.ramzisai.callmonitor.presentation.ui.theme
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
