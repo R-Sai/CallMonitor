@@ -15,4 +15,6 @@ dependencyResolutionManagement {
 
 rootProject.name = "Call Monitor"
 include(":app")
- 
+include(":data")
+include(":domain")
+include(":di")
