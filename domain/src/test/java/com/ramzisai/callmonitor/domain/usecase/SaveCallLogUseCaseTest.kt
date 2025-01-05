@@ -1,6 +1,6 @@
 package com.ramzisai.callmonitor.domain.usecase
 
-import com.ramzisai.callmonitor.domain.model.CallLogEntry
+import com.ramzisai.callmonitor.domain.model.CallLogDomainModel
 import com.ramzisai.callmonitor.domain.repository.CallLogRepository
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -50,7 +50,7 @@ class SaveCallLogUseCaseTest {
         coVerify {
             mockRepository.putCallLog(
                 eq(
-                    CallLogEntry(
+                    CallLogDomainModel(
                         name = NAME,
                         number = NUMBER,
                         timestamp = TIMESTAMP,

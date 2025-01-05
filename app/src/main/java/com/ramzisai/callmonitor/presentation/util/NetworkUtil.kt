@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.net.LinkProperties
 import android.net.NetworkCapabilities
+import com.ramzisai.callmonitor.presentation.Constants.SERVER.SERVER_PORT
 import java.net.Inet4Address
 
 object NetworkUtil {
@@ -17,7 +18,7 @@ object NetworkUtil {
             for (address in linkProperties.linkAddresses) {
                 val ip = address.address
                 if (ip is Inet4Address) {
-                    return ip.hostAddress
+                    return "http://${ip.hostAddress}:$SERVER_PORT"
                 }
             }
         }

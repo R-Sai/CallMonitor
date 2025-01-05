@@ -6,7 +6,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.ramzisai.callmonitor.domain.model.CallLogEntry
+import com.ramzisai.callmonitor.domain.model.CallLogDomainModel
 import com.ramzisai.callmonitor.presentation.ui.screens.MainScreen
 import com.ramzisai.callmonitor.presentation.ui.theme.CallMonitorTheme
 import com.ramzisai.callmonitor.presentation.util.DateUtil
@@ -21,7 +21,7 @@ class MainScreenTest {
     val composeTestRule = createComposeRule()
 
     @Test
-    fun MainScreenCallLogTest() {
+    fun mainScreenCallLogTest() {
         // given
         val mockCallLog = getMockCallLog()
 
@@ -31,25 +31,29 @@ class MainScreenTest {
                 MainScreen(
                     callLog = mockCallLog,
                     address = MOCK_ADDRESS,
-                    onServerButtonClicked = {}
+                    isWifiEnabled = true,
+                    onOpenWifiSettingsClicked = {},
+                    onServerButtonClicked = {},
                 )
             }
         }
 
         // then
-        composeTestRule.onNodeWithTag("1").assertIsDisplayed()
-        composeTestRule.onNodeWithTag("2").assertIsDisplayed()
-        composeTestRule.onNodeWithTag("3").assertIsDisplayed()
-        composeTestRule.onNodeWithTag("4").assertIsDisplayed()
-        mockCallLog.forEach { entry ->
-            composeTestRule.onNodeWithText(entry.name ?: "Unknown").assertIsDisplayed()
-            composeTestRule.onNodeWithText(entry.number ?: "Unknown").assertIsDisplayed()
-            composeTestRule.onNodeWithText(DateUtil.formatDuration(entry.duration)).assertIsDisplayed()
+        with(composeTestRule) {
+            onNodeWithTag("1").assertIsDisplayed()
+            onNodeWithTag("2").assertIsDisplayed()
+            onNodeWithTag("3").assertIsDisplayed()
+            onNodeWithTag("4").assertIsDisplayed()
+            mockCallLog.forEach { entry ->
+                onNodeWithText(entry.name ?: "Unknown").assertIsDisplayed()
+                onNodeWithText(entry.number ?: "Unknown").assertIsDisplayed()
+                onNodeWithText(DateUtil.formatDuration(entry.duration)).assertIsDisplayed()
+            }
         }
     }
 
     @Test
-    fun MainScreenServerCardTest() {
+    fun mainScreenServerCardTest() {
         // given
         var isServerRunning = false
 
@@ -59,6 +63,8 @@ class MainScreenTest {
                 MainScreen(
                     callLog = emptyList(),
                     address = MOCK_ADDRESS,
+                    isWifiEnabled = true,
+                    onOpenWifiSettingsClicked = {},
                     onServerButtonClicked = { isrunning ->
                         isServerRunning = isrunning
                     }
@@ -67,19 +73,21 @@ class MainScreenTest {
         }
 
         // then
-        composeTestRule.onNodeWithText(MOCK_ADDRESS).assertIsDisplayed()
-        composeTestRule.onNodeWithText("Start server").assertIsDisplayed()
-        composeTestRule.onNodeWithText("Server stopped").assertIsDisplayed()
+        with(composeTestRule) {
+            onNodeWithText(MOCK_ADDRESS).assertIsDisplayed()
+            onNodeWithText("Start server").assertIsDisplayed()
+            onNodeWithText("Server stopped").assertIsDisplayed()
 
-        composeTestRule.onNodeWithText("Start server").performClick()
+            onNodeWithText("Start server").performClick()
 
-        composeTestRule.onNodeWithText("Stop server").assertIsDisplayed()
-        composeTestRule.onNodeWithText("Server running").assertIsDisplayed()
+            onNodeWithText("Stop server").assertIsDisplayed()
+            onNodeWithText("Server running").assertIsDisplayed()
+        }
         assert(isServerRunning) { "onServerButtonClicked callback was not called" }
     }
 
     private fun getMockCallLog() = listOf(
-        CallLogEntry(
+        CallLogDomainModel(
             id = 1,
             timestamp = 100,
             duration = 30,
@@ -88,7 +96,7 @@ class MainScreenTest {
             timesQueried = 0,
             isOngoing = false
         ),
-        CallLogEntry(
+        CallLogDomainModel(
             id = 2,
             timestamp = 90,
             duration = 120,
@@ -97,7 +105,7 @@ class MainScreenTest {
             timesQueried = 0,
             isOngoing = false
         ),
-        CallLogEntry(
+        CallLogDomainModel(
             id = 3,
             timestamp = 80,
             duration = 0,
@@ -106,7 +114,7 @@ class MainScreenTest {
             timesQueried = 0,
             isOngoing = false
         ),
-        CallLogEntry(
+        CallLogDomainModel(
             id = 4,
             timestamp = 70,
             duration = 345,

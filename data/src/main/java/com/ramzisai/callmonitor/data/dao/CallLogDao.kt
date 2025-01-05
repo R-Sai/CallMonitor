@@ -5,23 +5,23 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
-import com.ramzisai.callmonitor.data.model.CallLogEntity
+import com.ramzisai.callmonitor.data.model.CallLogDataModel
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface CallLogDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(callLog: CallLogEntity): Long
+    suspend fun insert(callLog: CallLogDataModel): Long
 
-    @Query("SELECT * FROM ${CallLogEntity.TABLE_NAME}")
-    fun getCallLogs(): Flow<List<CallLogEntity>>
+    @Query("SELECT * FROM ${CallLogDataModel.TABLE_NAME}")
+    fun getCallLogs(): Flow<List<CallLogDataModel>>
 
     @Update(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun updateCallLogs(callLogEntities: List<CallLogEntity>)
+    suspend fun updateCallLogs(callLogEntities: List<CallLogDataModel>)
 
-    @Query("UPDATE ${CallLogEntity.TABLE_NAME} SET ${CallLogEntity.COLUMN_IS_ONGOING} = :isOngoing WHERE id = :id")
+    @Query("UPDATE ${CallLogDataModel.TABLE_NAME} SET ${CallLogDataModel.COLUMN_IS_ONGOING} = :isOngoing WHERE id = :id")
     suspend fun updateCallLogOnGoing(id: Long, isOngoing: Boolean)
 
-    @Query("UPDATE ${CallLogEntity.TABLE_NAME} SET ${CallLogEntity.COLUMN_DURATION} = :duration WHERE id = :id")
+    @Query("UPDATE ${CallLogDataModel.TABLE_NAME} SET ${CallLogDataModel.COLUMN_DURATION} = :duration WHERE id = :id")
     suspend fun updateCallLogDuration(id: Long, duration: Long)
 }

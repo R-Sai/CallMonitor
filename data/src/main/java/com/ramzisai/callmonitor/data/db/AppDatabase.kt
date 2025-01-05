@@ -3,9 +3,9 @@ package com.ramzisai.callmonitor.data.db
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import com.ramzisai.callmonitor.data.dao.CallLogDao
-import com.ramzisai.callmonitor.data.model.CallLogEntity
+import com.ramzisai.callmonitor.data.model.CallLogDataModel
 
-@Database(entities = [CallLogEntity::class], version = 1)
+@Database(entities = [CallLogDataModel::class], version = 1)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun callLogDao(): CallLogDao
 

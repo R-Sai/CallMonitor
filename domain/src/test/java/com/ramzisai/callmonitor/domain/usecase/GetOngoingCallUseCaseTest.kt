@@ -1,6 +1,6 @@
 package com.ramzisai.callmonitor.domain.usecase
 
-import com.ramzisai.callmonitor.domain.model.CallLogEntry
+import com.ramzisai.callmonitor.domain.model.CallLogDomainModel
 import com.ramzisai.callmonitor.domain.repository.CallLogRepository
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -60,7 +60,7 @@ class GetOngoingCallUseCaseTest {
     }
 
     companion object {
-        val ONGOING_CALL_ENTRY = CallLogEntry(
+        val ONGOING_CALL_ENTRY = CallLogDomainModel(
             id = 1,
             timestamp = 111,
             duration = 10,
@@ -69,7 +69,7 @@ class GetOngoingCallUseCaseTest {
             timesQueried = 0,
             isOngoing = true,
         )
-        val NOT_ONGOING_CALL_ENTRY = CallLogEntry(
+        val NOT_ONGOING_CALL_ENTRY = CallLogDomainModel(
             id = 2,
             timestamp = 222,
             duration = 20,

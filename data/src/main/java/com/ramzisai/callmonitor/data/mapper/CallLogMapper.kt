@@ -1,11 +1,11 @@
 package com.ramzisai.callmonitor.data.mapper
 
-import com.ramzisai.callmonitor.data.model.CallLogEntity
-import com.ramzisai.callmonitor.domain.model.CallLogEntry
+import com.ramzisai.callmonitor.data.model.CallLogDataModel
+import com.ramzisai.callmonitor.domain.model.CallLogDomainModel
 
 class CallLogMapper {
-    fun map(callLogEntity: CallLogEntity) =
-        CallLogEntry(
+    fun map(callLogEntity: CallLogDataModel) =
+        CallLogDomainModel(
             id = callLogEntity.id,
             timestamp = callLogEntity.timestamp,
             duration = callLogEntity.duration,
@@ -15,8 +15,8 @@ class CallLogMapper {
             isOngoing = callLogEntity.isOngoing
         )
 
-    fun map(callLogEntry: CallLogEntry) =
-        CallLogEntity(
+    fun map(callLogEntry: CallLogDomainModel) =
+        CallLogDataModel(
             id = callLogEntry.id,
             timestamp = callLogEntry.timestamp,
             duration = callLogEntry.duration,

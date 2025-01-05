@@ -1,6 +1,6 @@
 package com.ramzisai.callmonitor.presentation.model
 
-import com.ramzisai.callmonitor.domain.model.CallLogEntry
+import com.ramzisai.callmonitor.domain.model.CallLogDomainModel
 import com.ramzisai.callmonitor.presentation.util.DateUtil
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -19,7 +19,7 @@ data class LogResponse(
     val timesQueried: Int
 ) {
     companion object {
-        fun create(callLogs: List<CallLogEntry>?): List<LogResponse> {
+        fun create(callLogs: List<CallLogDomainModel>?): List<LogResponse> {
             return callLogs?.map { callLog ->
                 LogResponse(
                     beginning = DateUtil.format(callLog.timestamp),

@@ -31,15 +31,17 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.ramzisai.callmonitor.R
-import com.ramzisai.callmonitor.domain.model.CallLogEntry
+import com.ramzisai.callmonitor.domain.model.CallLogDomainModel
 import com.ramzisai.callmonitor.presentation.util.DateUtil
 
 
 @Composable
 fun MainScreen(
     modifier: Modifier = Modifier,
-    callLog: List<CallLogEntry>,
+    callLog: List<CallLogDomainModel>,
     address: String,
+    isWifiEnabled: Boolean,
+    onOpenWifiSettingsClicked: () -> Unit,
     onServerButtonClicked: (Boolean) -> Unit,
 ) {
     var isServerRunning by rememberSaveable { mutableStateOf(false) }
@@ -48,7 +50,12 @@ fun MainScreen(
         modifier = modifier.padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        ServerControlCard(address = address, isServerRunning = isServerRunning) {
+        ServerControlCard(
+            address = address,
+            isServerRunning = isServerRunning,
+            isWifiEnabled = isWifiEnabled,
+            onOpenWifiSettingsClicked = onOpenWifiSettingsClicked
+        ) {
             isServerRunning = !isServerRunning
             onServerButtonClicked(isServerRunning)
         }
@@ -62,7 +69,7 @@ fun MainScreen(
 fun MainScreenPreview() {
     MainScreen(
         callLog = listOf(
-            CallLogEntry(
+            CallLogDomainModel(
                 timestamp = 12345,
                 duration = 12345L,
                 number = "123-456-789",
@@ -72,6 +79,8 @@ fun MainScreenPreview() {
             )
         ),
         address = "192.10.0.1",
+        isWifiEnabled = false,
+        onOpenWifiSettingsClicked = {},
         onServerButtonClicked = {},
     )
 }
@@ -81,41 +90,85 @@ fun ServerControlCard(
     modifier: Modifier = Modifier,
     address: String,
     isServerRunning: Boolean,
-    onServerButtonClicked: () -> Unit,
+    isWifiEnabled: Boolean,
+    onOpenWifiSettingsClicked: () -> Unit,
+    onServerButtonClicked: () -> Unit
 ) {
     Card(
         modifier = modifier
             .fillMaxWidth()
             .padding(bottom = 16.dp)
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+        if (isWifiEnabled) {
+            EnabledServerControl(isServerRunning, address, onServerButtonClicked)
+        } else {
+            DisabledServerControl(onOpenWifiSettingsClicked)
+        }
+    }
+}
+
+@Composable
+private fun EnabledServerControl(isServerRunning: Boolean, address: String, onServerButtonClicked: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = if (isServerRunning) stringResource(R.string.label_server_status_running) else stringResource(R.string.label_server_status_stopped),
+            style = MaterialTheme.typography.titleMedium
+        )
+
+        Text(
+            text = address,
+            style = MaterialTheme.typography.bodyMedium,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(vertical = 8.dp)
+        )
+
+        Button(
+            onClick = {
+                onServerButtonClicked()
+            },
+            modifier = Modifier.padding(top = 8.dp)
         ) {
             Text(
-                text = if (isServerRunning) stringResource(R.string.label_server_status_running) else stringResource(R.string.label_server_status_stopped),
-                style = MaterialTheme.typography.titleMedium
+                text = if (isServerRunning) stringResource(R.string.button_stop_server) else stringResource(R.string.button_start_server)
             )
+        }
+    }
+}
 
+@Composable
+private fun DisabledServerControl(onOpenWifiSettingsClicked: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = stringResource(R.string.label_no_wifi),
+            style = MaterialTheme.typography.titleMedium
+        )
+
+        Text(
+            text = stringResource(R.string.label_no_wifi_desc),
+            style = MaterialTheme.typography.bodyMedium,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(vertical = 8.dp)
+        )
+
+        Button(
+            onClick = {
+                onOpenWifiSettingsClicked()
+            },
+            modifier = Modifier.padding(top = 8.dp)
+        ) {
             Text(
-                text = address,
-                style = MaterialTheme.typography.bodyMedium,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(vertical = 8.dp)
+                text = stringResource(R.string.button_open_wifi_settings)
             )
-
-            Button(
-                onClick = {
-                    onServerButtonClicked()
-                },
-                modifier = Modifier.padding(top = 8.dp)
-            ) {
-                Text(
-                    text = if (isServerRunning) stringResource(R.string.button_stop_server) else stringResource(R.string.button_start_server)
-                )
-            }
         }
     }
 }
@@ -123,7 +176,7 @@ fun ServerControlCard(
 @Composable
 fun CallLog(
     modifier: Modifier = Modifier,
-    callLog: List<CallLogEntry>
+    callLog: List<CallLogDomainModel>
 ) {
     Column(
         modifier = modifier,
@@ -151,10 +204,12 @@ fun CallLog(
 @Composable
 fun CallLogItem(
     modifier: Modifier = Modifier,
-    entry: CallLogEntry
+    entry: CallLogDomainModel
 ) {
     Card(
-        modifier = modifier.fillMaxWidth().testTag(entry.id.toString())
+        modifier = modifier
+            .fillMaxWidth()
+            .testTag(entry.id.toString())
     ) {
         Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
             Image(
@@ -194,7 +249,7 @@ fun CallLogItem(
 @Composable
 fun CallLogItemPreview() {
     CallLogItem(
-        entry = CallLogEntry(
+        entry = CallLogDomainModel(
             number = "695436313",
             name = "Ramzi Sai",
             timestamp = 1734557921434,

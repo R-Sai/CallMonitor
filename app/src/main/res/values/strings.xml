@@ -5,9 +5,12 @@
     <string name="label_server_status_running">Server running</string>
     <string name="label_call_log">Call log</string>
     <string name="label_unknown">Unknown</string>
+    <string name="label_no_wifi">No wifi connection</string>
+    <string name="label_no_wifi_desc">Please connect to a network in Wifi Settings</string>
 
     <string name="button_start_server">Start server</string>
     <string name="button_stop_server">Stop server</string>
+    <string name="button_open_wifi_settings">Open Wifi Settings</string>
 
     <string name="error_permissions">Not all required permissions are enabled</string>
 

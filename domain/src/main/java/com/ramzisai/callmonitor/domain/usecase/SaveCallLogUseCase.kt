@@ -1,6 +1,6 @@
 package com.ramzisai.callmonitor.domain.usecase
 
-import com.ramzisai.callmonitor.domain.model.CallLogEntry
+import com.ramzisai.callmonitor.domain.model.CallLogDomainModel
 import com.ramzisai.callmonitor.domain.repository.CallLogRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
@@ -10,7 +10,7 @@ class SaveCallLogUseCase @Inject constructor(
 ) : UseCase<SaveCallLogUseCase.Params, Long> {
     override suspend fun invoke(parameter: Params): Flow<Long> {
         return repository.putCallLog(
-            CallLogEntry(
+            CallLogDomainModel(
                 name = parameter.name,
                 number = parameter.number,
                 timestamp = parameter.timestamp,

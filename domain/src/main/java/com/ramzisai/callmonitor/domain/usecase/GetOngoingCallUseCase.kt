@@ -1,6 +1,6 @@
 package com.ramzisai.callmonitor.domain.usecase
 
-import com.ramzisai.callmonitor.domain.model.CallLogEntry
+import com.ramzisai.callmonitor.domain.model.CallLogDomainModel
 import com.ramzisai.callmonitor.domain.repository.CallLogRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -9,8 +9,8 @@ import javax.inject.Inject
 
 class GetOngoingCallUseCase @Inject constructor(
     private val repository: CallLogRepository
-) : UseCase<Unit, CallLogEntry?> {
-    override suspend fun invoke(parameter: Unit): Flow<CallLogEntry?> {
+) : UseCase<Unit, CallLogDomainModel?> {
+    override suspend fun invoke(parameter: Unit): Flow<CallLogDomainModel?> {
         return repository.getCallLog().take(1).map { log ->
             log.sortedByDescending { it.timestamp }.firstOrNull { it.isOngoing }
         }

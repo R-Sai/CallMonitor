@@ -1,9 +1,11 @@
 package com.ramzisai.callmonitor.presentation.viewmodel
 
 import android.app.Application
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.ramzisai.callmonitor.domain.model.CallLogEntry
+import com.ramzisai.callmonitor.domain.model.CallLogDomainModel
 import com.ramzisai.callmonitor.domain.usecase.ObserveCallLogUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -18,8 +20,14 @@ class MainViewModel @Inject constructor(
     val observeCallLogUseCase: ObserveCallLogUseCase
 ) : AndroidViewModel(application) {
 
-    private val _callLog = MutableStateFlow<List<CallLogEntry>>(emptyList())
-    val callLog: StateFlow<List<CallLogEntry>> = _callLog
+    private val _callLog = MutableStateFlow<List<CallLogDomainModel>>(emptyList())
+    val callLog: StateFlow<List<CallLogDomainModel>> = _callLog
+
+    private val _isWifiEnabled = mutableStateOf(false)
+    val isWifiEnabled: State<Boolean> = _isWifiEnabled
+
+    private val _address = mutableStateOf("")
+    val address: State<String> = _address
 
     private var callLogJob: Job? = null
 
@@ -34,5 +42,14 @@ class MainViewModel @Inject constructor(
                 _callLog.value = callLog
             }
         }
+    }
+
+    fun onWifiConnected(address: String?) {
+        _isWifiEnabled.value = true
+        _address.value = address ?: ""
+    }
+
+    fun onWifiDisconnected() {
+        _isWifiEnabled.value = false
     }
 }

@@ -3,7 +3,7 @@ package com.ramzisai.callmonitor.data.model
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.ramzisai.callmonitor.data.model.CallLogEntity.Companion.TABLE_NAME
+import com.ramzisai.callmonitor.data.model.CallLogDataModel.Companion.TABLE_NAME
 
 @Entity(tableName = TABLE_NAME)
 data class CallLogDataModel(

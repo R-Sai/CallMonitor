@@ -1,6 +1,6 @@
 package com.ramzisai.callmonitor.domain.usecase
 
-import com.ramzisai.callmonitor.domain.model.CallLogEntry
+import com.ramzisai.callmonitor.domain.model.CallLogDomainModel
 import com.ramzisai.callmonitor.domain.repository.CallLogRepository
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -43,7 +43,7 @@ class ObserveCallLogUseCaseTest {
         }
 
         // when
-        val callLog = mutableListOf<List<CallLogEntry>>()
+        val callLog = mutableListOf<List<CallLogDomainModel>>()
         observeCallLogUseCase(Unit).toList(callLog)
 
         // then
@@ -54,7 +54,7 @@ class ObserveCallLogUseCaseTest {
     companion object {
         const val FLOW_DELAY_MS = 200L
         val CALL_LOG_ENTRIES_1 = listOf(
-            CallLogEntry(
+            CallLogDomainModel(
                 id = 1,
                 timestamp = 456,
                 duration = 10,
@@ -63,7 +63,7 @@ class ObserveCallLogUseCaseTest {
                 timesQueried = 0,
                 isOngoing = true,
             ),
-            CallLogEntry(
+            CallLogDomainModel(
                 id = 2,
                 timestamp = 123,
                 duration = 20,
@@ -74,7 +74,7 @@ class ObserveCallLogUseCaseTest {
             )
         )
         val CALL_LOG_ENTRIES_2 = listOf(
-            CallLogEntry(
+            CallLogDomainModel(
                 id = 3,
                 timestamp = 789,
                 duration = 30,
@@ -83,7 +83,7 @@ class ObserveCallLogUseCaseTest {
                 timesQueried = 2,
                 isOngoing = false,
             ),
-            CallLogEntry(
+            CallLogDomainModel(
                 id = 4,
                 timestamp = 678,
                 duration = 40,

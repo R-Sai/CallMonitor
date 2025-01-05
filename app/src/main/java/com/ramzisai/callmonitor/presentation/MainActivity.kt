@@ -7,9 +7,14 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
+import android.net.NetworkRequest
 import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
+import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -22,13 +27,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityCompat
 import com.ramzisai.callmonitor.R
-import com.ramzisai.callmonitor.presentation.Constants.SERVER.SERVER_PORT
 import com.ramzisai.callmonitor.presentation.service.CallMonitorService
 import com.ramzisai.callmonitor.presentation.service.ServerService
 import com.ramzisai.callmonitor.presentation.ui.screens.MainScreen
@@ -56,6 +58,23 @@ class MainActivity : ComponentActivity() {
             Log.d(TAG, "onServiceDisconnected")
         }
 
+    }
+
+    lateinit var connectivityManager: ConnectivityManager
+
+    private val networkCallback = object : ConnectivityManager.NetworkCallback() {
+        override fun onAvailable(network: Network) {
+            val networkCapabilities = connectivityManager.getNetworkCapabilities(network)
+            val isConnectedToWifi = networkCapabilities?.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) == true
+
+            if (isConnectedToWifi) {
+                viewModel.onWifiConnected(NetworkUtil.getWifiIpAddress(this@MainActivity))
+            }
+        }
+
+        override fun onLost(network: Network) {
+            viewModel.onWifiDisconnected()
+        }
     }
 
     @SuppressLint("InlinedApi")
@@ -121,15 +140,22 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    private fun openWifiSettings() {
+        val intent = Intent(Settings.ACTION_WIFI_SETTINGS)
+        startActivity(intent)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        connectivityManager = applicationContext.getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
         setContent {
             CallMonitorTheme {
                 CallMonitorApp(
                     modifier = Modifier.fillMaxSize(),
                     viewModel = viewModel,
                     onStartServer = { startServerService() },
-                    onStopServer = { stopServerService() }
+                    onStopServer = { stopServerService() },
+                    onOpenWifiSettings = { openWifiSettings() }
                 )
             }
         }
@@ -138,6 +164,17 @@ class MainActivity : ComponentActivity() {
     override fun onResume() {
         super.onResume()
         checkAndRequestPermissions()
+        listenToWifiNetworkState()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        connectivityManager.unregisterNetworkCallback(networkCallback)
+    }
+
+    private fun listenToWifiNetworkState() {
+        val request = NetworkRequest.Builder().addTransportType(NetworkCapabilities.TRANSPORT_WIFI).build()
+        connectivityManager.registerNetworkCallback(request, networkCallback)
     }
 
     companion object {
@@ -149,12 +186,13 @@ class MainActivity : ComponentActivity() {
 fun CallMonitorApp(
     modifier: Modifier = Modifier,
     viewModel: MainViewModel,
+    onOpenWifiSettings: () -> Unit,
     onStartServer: () -> Unit,
     onStopServer: () -> Unit
 ) {
-    val context = LocalContext.current
     val callLog by viewModel.callLog.collectAsState()
-    val address by rememberSaveable { mutableStateOf("http://${NetworkUtil.getWifiIpAddress(context)}:$SERVER_PORT") }
+    val isWifiEnabled by rememberSaveable { viewModel.isWifiEnabled }
+    val address by rememberSaveable { viewModel.address }
 
     Surface(
         modifier = modifier,
@@ -163,6 +201,8 @@ fun CallMonitorApp(
         MainScreen(
             callLog = callLog,
             address = address,
+            isWifiEnabled = isWifiEnabled,
+            onOpenWifiSettingsClicked = onOpenWifiSettings,
             onServerButtonClicked = { isServerRunning ->
                 if (isServerRunning) {
                     onStartServer()
