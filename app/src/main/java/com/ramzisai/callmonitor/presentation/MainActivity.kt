@@ -25,11 +25,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.core.app.ActivityCompat
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ramzisai.callmonitor.R
 import com.ramzisai.callmonitor.presentation.service.CallMonitorService
 import com.ramzisai.callmonitor.presentation.service.ServerService
@@ -190,7 +190,7 @@ fun CallMonitorApp(
     onStartServer: () -> Unit,
     onStopServer: () -> Unit
 ) {
-    val callLog by viewModel.callLog.collectAsState()
+    val callLog by viewModel.callLog.collectAsStateWithLifecycle()
     val isWifiEnabled by rememberSaveable { viewModel.isWifiEnabled }
     val address by rememberSaveable { viewModel.address }
 
