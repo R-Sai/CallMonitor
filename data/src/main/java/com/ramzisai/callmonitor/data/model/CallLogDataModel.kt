@@ -6,7 +6,7 @@ import androidx.room.PrimaryKey
 import com.ramzisai.callmonitor.data.model.CallLogEntity.Companion.TABLE_NAME
 
 @Entity(tableName = TABLE_NAME)
-data class CallLogEntity(
+data class CallLogDataModel(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     @ColumnInfo(name = COLUMN_TIMESTAMP) val timestamp: Long,
     @ColumnInfo(name = COLUMN_NUMBER) val number: String?,

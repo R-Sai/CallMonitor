@@ -45,7 +45,7 @@ fun MainScreen(
     var isServerRunning by rememberSaveable { mutableStateOf(false) }
 
     Column(
-        modifier = Modifier.padding(16.dp),
+        modifier = modifier.padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         ServerControlCard(address = address, isServerRunning = isServerRunning) {
@@ -126,6 +126,7 @@ fun CallLog(
     callLog: List<CallLogEntry>
 ) {
     Column(
+        modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(

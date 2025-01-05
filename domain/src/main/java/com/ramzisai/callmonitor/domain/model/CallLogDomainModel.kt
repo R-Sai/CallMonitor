@@ -1,6 +1,6 @@
 package com.ramzisai.callmonitor.domain.model
 
-data class CallLogEntry(
+data class CallLogDomainModel(
     val id: Int = 0,
     val timestamp: Long,
     val duration: Long = 0,
